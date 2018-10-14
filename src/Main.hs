@@ -1,8 +1,11 @@
 module Main where
 
+import           Text.Printf
+
 -- Basic Datatype
 data Term = Con Int
           | Div Term Term
+          deriving (Show)
 
 -- examples
 okEx, errorEx :: Term
@@ -42,8 +45,9 @@ eval2_2 (Div t u) = case eval2_2 t of
 
 -- Section 2.3 Evaluator with State
 -- type definition
-type M2_3 a = State -> (a, State)
 type State = Int
+type M2_3 a = State -> (a, State)
+
 
 -- Evaluator
 eval2_3 :: Term -> M2_3 Int
@@ -52,6 +56,23 @@ eval2_3 (Div t u) x = let (a, y) = eval2_3 t x in
                       let (b, z) = eval2_3 u y in
                       (a `div` b, z + 1)
 
+-- Section 2.4 Evaluator with Output
+-- type
+type Output = String
+type M2_4 a = (Output, a)
+
+-- Line
+line :: Term -> Int -> Output
+line t a = "eval(" <> show t <> ") <- " <> show a <> ", "
+
+-- Evaluator
+eval2_4 :: Term -> M2_4 Int
+eval2_4 (Con a) = (line (Con a) a, a)
+eval2_4 (Div t u) = let (x, a) = eval2_4 t in
+                    let (y, b) = eval2_4 u in
+                    (x ++ y ++ (line (Div t u)(a `div` b)), a `div` b)
+
+-- Section 2.5
 
 -- Run some things
 main :: IO ()
@@ -70,6 +91,8 @@ main = do
   -- Section 2.3
   putStrLn $ show $ eval2_3 okEx 0
 
+  -- Section 2.4
+  putStrLn $ show $ eval2_4 okEx
 
 
 
